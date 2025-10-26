@@ -1,6 +1,7 @@
 package example.oauth2_sample.member.service;
 
 import example.oauth2_sample.member.domain.Member;
+import example.oauth2_sample.member.domain.SocialType;
 import example.oauth2_sample.member.dto.MemberCreateDto;
 import example.oauth2_sample.member.dto.MemberLoginDto;
 import example.oauth2_sample.member.repository.MemberRepository;
@@ -37,6 +38,22 @@ public class MemberService {
     if(!passwordEncoder.matches(member.getPassword(), memberLoginDto.getPassword())) {
       throw new IllegalArgumentException("password not match");
     }
+    return member;
+  }
+
+  public Member getMemberBySocialId(String socialId) {
+    // controller 레이어에서 null 체킹을 하기 때문에 서비스 레이어에서 따로 검증하기 않음.
+    Member member = memberRepository.findBySocialId(socialId).orElse(null);
+    return member;
+  }
+
+  public Member createOauth(String sociald, String email, SocialType socialType) {
+    Member member = Member.builder()
+            .email(email)
+            .socialType(socialType)
+            .socialId(sociald)
+            .build();
+    memberRepository.save(member);
     return member;
   }
 }
