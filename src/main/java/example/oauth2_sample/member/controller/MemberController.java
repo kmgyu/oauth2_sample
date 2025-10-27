@@ -48,7 +48,7 @@ public class MemberController {
   @PostMapping("/google/doLogin")
   public ResponseEntity<?> googleLogin(@RequestBody RedirectDto redirectDto) {
 //    accesstoken 발급
-    AccessTokenDto accessTokenDto = googleService.getAcessToken();
+    AccessTokenDto accessTokenDto = googleService.getAcessToken(redirectDto.getCode());
 
 //    사용자정보 획득
     GoogleProfileDto googleProfileDto = googleService.getGoogleProfile(accessTokenDto.getAccessToken());

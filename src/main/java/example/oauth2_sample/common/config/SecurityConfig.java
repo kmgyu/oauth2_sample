@@ -34,7 +34,10 @@ public class SecurityConfig {
             .httpBasic(AbstractHttpConfigurer::disable) // Basic Authentication disable
             // 세션 기반 인증 비활성화
             .sessionManagement(s->s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authorizeHttpRequests(a->a.requestMatchers("/member/create", "/member/login").permitAll()
+            .authorizeHttpRequests(a->a.requestMatchers("/member/create",
+                            "/member/login",
+                            "/member/google/doLogin",
+                            "/member/kakao/doLogin").permitAll()
                     .anyRequest().authenticated())
             // UsernamePasswordAuthenticationFilter는 이 클래스에서 폼 로그인 인증을 처리
             .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class) // 특정 url 패턴 제외 검증하는데, 여기서 검증한다는 것. UsernamePasswordAuthenticationFilter 동작 전에 이것을 사용하겠다.
