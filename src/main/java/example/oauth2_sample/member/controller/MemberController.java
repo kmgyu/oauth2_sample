@@ -5,6 +5,7 @@ import example.oauth2_sample.member.domain.Member;
 import example.oauth2_sample.member.domain.SocialType;
 import example.oauth2_sample.member.dto.*;
 import example.oauth2_sample.member.service.GoogleService;
+import example.oauth2_sample.member.service.KakaoService;
 import example.oauth2_sample.member.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -24,6 +25,7 @@ public class MemberController {
   private final MemberService memberService;
   private final JwtTokenProvider jwtTokenProvider;
   private final GoogleService googleService;
+  private final KakaoService kakaoService;
 
   @PostMapping("/signup")
   public ResponseEntity<?> memberCreate(@RequestBody MemberCreateDto memberCreateDto) {
@@ -61,6 +63,25 @@ public class MemberController {
     }
 
 //    회원 가입이 돼어있는 회원이면 토큰 발급
+    String jwtToken = jwtTokenProvider.createToken((originalMember.getEmail()), originalMember.getRole().toString());
+    Map<String, Object> loginInfo = new HashMap<>();
+    loginInfo.put("id", originalMember.getId());
+    loginInfo.put("token", jwtToken);
+    return new ResponseEntity<>(loginInfo, HttpStatus.OK);
+  }
+
+
+  @PostMapping("/kakao/doLogin")
+  public ResponseEntity<?> kakaoLogin(@RequestBody RedirectDto redirectDto) {
+    AccessTokenDto accessTokenDto = kakaoService.getAcessToken(redirectDto.getCode());
+
+    KakaoProfileDto kakaoProfileDto = kakaoService.getKakaoProfile(accessTokenDto.getAccessToken());
+
+    Member originalMember = memberService.getMemberBySocialId(kakaoProfileDto.getId()); // socialid = oauthid
+    if (originalMember == null) {
+      originalMember = memberService.createOauth(kakaoProfileDto.getId(), kakaoProfileDto.getKakaoAccount().getEmail(), SocialType.KAKAO);
+    }
+
     String jwtToken = jwtTokenProvider.createToken((originalMember.getEmail()), originalMember.getRole().toString());
     Map<String, Object> loginInfo = new HashMap<>();
     loginInfo.put("id", originalMember.getId());

@@ -2,6 +2,7 @@ package example.oauth2_sample.member.service;
 
 import example.oauth2_sample.member.dto.AccessTokenDto;
 import example.oauth2_sample.member.dto.GoogleProfileDto;
+import example.oauth2_sample.member.dto.KakaoProfileDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -12,14 +13,13 @@ import org.springframework.web.client.RestClient;
 
 @Slf4j
 @Service
-public class GoogleService {
+public class KakaoService {
 
-  @Value("${oauth.google.client-id}")
-  private String googleClientId;
-  @Value("${oauth.google.client-secret}")
-  private String googleClientSecret;
-  @Value("${oauth.google.redirect-uri}")
-  private String googleRedirectUri;
+  @Value("${oauth.kakao.client-id}")
+  private String kakaoClientId;
+
+  @Value("${oauth.kakao.redirect-uri}")
+  private String kakaoRedirectUri;
 
 
   public AccessTokenDto getAcessToken(String code) {
@@ -32,15 +32,13 @@ public class GoogleService {
     // MultiValueMap을 통해 form-data 형식 body 간편하게 조립
     MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
     params.add("code", code);
-    params.add("client_id", googleClientId);
-    params.add("client_secret", googleClientSecret);
-    params.add("redirect_uri", googleRedirectUri);
-    params.add("grant_type", "authorization_code"); // 강의에서는 여긴 단순 문자열이라 설정은 따로 안해주었다고 함.
-    // https://datatracker.ietf.org/doc/html/rfc6749#section-4.1.3
-    // 스펙을 찾아보니, "반드시" authorization_code여야 한다고 한다. 타입 자체는 4개가 있는 데 프론트에서 처리하는 것으로 보인다...?
+    params.add("client_id", kakaoClientId);
+    params.add("redirect_uri", kakaoRedirectUri);
+    params.add("grant_type", "authorization_code");
+
 
     ResponseEntity<AccessTokenDto> response = restClient.post()
-            .uri("https://oauth2.googleapis.com/token")
+            .uri("https://kauth.kakao.com/oauth/token")
             .header("Content-Type", "application/x-www-form-urlencoded;charset=UTF-8")
             // ?code=XXX%client_id=yyyy&... 방식으로 직접 설정도 가능하지만 multi value map으로 더 간편하게 만들어줄 수 있다.
             .body(params)
@@ -53,11 +51,11 @@ public class GoogleService {
     return response.getBody();
   }
 
-  public GoogleProfileDto getGoogleProfile(String token) {
+  public KakaoProfileDto getKakaoProfile(String token) {
     RestClient restClient = RestClient.create();
 
     ResponseEntity<GoogleProfileDto> response = restClient.get()
-            .uri("https://openidconnect.googleapis.com/v1/userinfo")
+            .uri("\thttps://kapi.kakao.com/v2/user/me")
             .header("Authorization", "Bearer " + token) // Bearer token이라는 명시 필요
             .retrieve()
             .toEntity(GoogleProfileDto.class);
