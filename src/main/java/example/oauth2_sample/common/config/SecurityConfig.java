@@ -1,6 +1,7 @@
 package example.oauth2_sample.common.config;
 
 import example.oauth2_sample.common.auth.JwtTokenFilter;
+import example.oauth2_sample.member.service.GoogleOauth2LoginSuccess;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,6 +23,7 @@ import java.util.Arrays;
 public class SecurityConfig {
   // 강의에서는 생성자 주입
   private final JwtTokenFilter jwtTokenFilter;
+  private final GoogleOauth2LoginSuccess googleOauth2LoginSuccess;
 
   @Bean
   public SecurityFilterChain myfilter(HttpSecurity http) throws Exception {
@@ -37,10 +39,13 @@ public class SecurityConfig {
             .authorizeHttpRequests(a->a.requestMatchers("/member/create",
                             "/member/login",
                             "/member/google/doLogin",
-                            "/member/kakao/doLogin").permitAll()
+                            "/member/kakao/doLogin",
+                            "/oauth/**").permitAll()
                     .anyRequest().authenticated())
             // UsernamePasswordAuthenticationFilter는 이 클래스에서 폼 로그인 인증을 처리
             .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class) // 특정 url 패턴 제외 검증하는데, 여기서 검증한다는 것. UsernamePasswordAuthenticationFilter 동작 전에 이것을 사용하겠다.
+            // oauth login 성공 시 실행할 클래스 정의
+            .oauth2Login(o -> o.successHandler(googleOauth2LoginSuccess))
             .build();
   }
 

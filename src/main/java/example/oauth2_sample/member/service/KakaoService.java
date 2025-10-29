@@ -54,11 +54,11 @@ public class KakaoService {
   public KakaoProfileDto getKakaoProfile(String token) {
     RestClient restClient = RestClient.create();
 
-    ResponseEntity<GoogleProfileDto> response = restClient.get()
+    ResponseEntity<KakaoProfileDto> response = restClient.get()
             .uri("\thttps://kapi.kakao.com/v2/user/me")
             .header("Authorization", "Bearer " + token) // Bearer token이라는 명시 필요
             .retrieve()
-            .toEntity(GoogleProfileDto.class);
+            .toEntity(KakaoProfileDto.class);
 
     log.info("Profile JSON {}", response.getBody());
 
