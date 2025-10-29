@@ -54,8 +54,17 @@ public class GoogleService {
   }
 
   public GoogleProfileDto getGoogleProfile(String token) {
+    RestClient restClient = RestClient.create();
 
-return null;
+    ResponseEntity<GoogleProfileDto> response = restClient.get()
+            .uri("https://openidconnect.googleapis.com/v1/userinfo")
+            .header("Authorization", "Bearer " + token) // Bearer token이라는 명시 필요
+            .retrieve()
+            .toEntity(GoogleProfileDto.class);
+
+    log.info("Profile JSON {}", response.getBody());
+
+    return response.getBody();
   }
 
 
